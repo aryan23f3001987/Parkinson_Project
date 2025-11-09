@@ -13,12 +13,10 @@ def load_model(model_name: str):
         raise FileNotFoundError(f"❌ Model file not found: {model_path}")
 
     try:
-        # Try loading with pickle
         with open(model_path, "rb") as f:
             model = pickle.load(f)
         print(f"✅ Loaded model (pickle): {model_name}")
     except Exception:
-        # Fallback to joblib
         model = joblib.load(model_path)
         print(f"✅ Loaded model (joblib): {model_name}")
 

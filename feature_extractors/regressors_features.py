@@ -11,7 +11,6 @@ def extract_regression_features(audio_path: str, age=65, sex=0, test_time=100.0)
     pitch = sound.to_pitch()
     pulses = parselmouth.praat.call(sound, "To PointProcess (periodic, cc)", 75, 500)
 
-    # Jitter & Shimmer features
     jitter_percent = parselmouth.praat.call(pulses, "Get jitter (local)", 0, 0, 75, 500, 1.3)
     jitter_abs = parselmouth.praat.call(pulses, "Get jitter (local, absolute)", 0, 0, 75, 500, 1.3)
     rap = parselmouth.praat.call(pulses, "Get jitter (rap)", 0, 0, 75, 500, 1.3)
@@ -25,7 +24,6 @@ def extract_regression_features(audio_path: str, age=65, sex=0, test_time=100.0)
     apq11 = parselmouth.praat.call([sound, pulses], "Get shimmer (apq11)", 0, 0, 75, 500, 1.3, 1.6)
     dda = 3 * apq3
 
-    # Harmonics
     hnr_obj = parselmouth.praat.call(sound, "To Harmonicity (cc)", 0.01, 75, 0.1, 1.0)
     HNR = parselmouth.praat.call(hnr_obj, "Get mean", 0, 0)
     NHR = 1 / (1 + 10 ** (HNR / 10))
@@ -35,7 +33,7 @@ def extract_regression_features(audio_path: str, age=65, sex=0, test_time=100.0)
     # dfa = parselmouth.praat.call(sound, "Get standard deviation", 0, 0)
     # ppe = abs(np.log10(np.mean([jitter_percent + shimmer])))
 
-    rpde = 0.0   # Placeholder – true extraction requires nonlinear analysis
+    rpde = 0.0
     dfa = 0.0
     ppe = abs(np.log10(np.mean([jitter_percent + shimmer])))
 
@@ -68,7 +66,6 @@ def extract_regression_features(audio_path: str, age=65, sex=0, test_time=100.0)
 if __name__ == "__main__":
     df = extract_regression_features("audio_samples/audio.wav", age=70, sex=0, test_time=50.0)
 
-    # Save the extracted features for pipeline use
     save_path = "data_storage/regression_features.csv"
     df.to_csv(save_path, index=False)
     print(f"✅ Regression features saved at: {save_path}")

@@ -11,12 +11,10 @@ def extract_classification_features(audio_path: str) -> pd.DataFrame:
     pitch = sound.to_pitch()
     pulses = parselmouth.praat.call(sound, "To PointProcess (periodic, cc)", 75, 500)
 
-    # Fundamental frequencies
     Fo = parselmouth.praat.call(pitch, "Get mean", 0, 0, "Hertz")
     Fhi = parselmouth.praat.call(pitch, "Get maximum", 0, 0, "Hertz", "Parabolic")
     Flo = parselmouth.praat.call(pitch, "Get minimum", 0, 0, "Hertz", "Parabolic")
 
-    # Jitter and shimmer measures
     jitter_percent = parselmouth.praat.call(pulses, "Get jitter (local)", 0, 0, 75, 500, 1.3)
     jitter_abs = parselmouth.praat.call(pulses, "Get jitter (local, absolute)", 0, 0, 75, 500, 1.3)
     rap = parselmouth.praat.call(pulses, "Get jitter (rap)", 0, 0, 75, 500, 1.3)
@@ -30,14 +28,11 @@ def extract_classification_features(audio_path: str) -> pd.DataFrame:
     apq11 = parselmouth.praat.call([sound, pulses], "Get shimmer (apq11)", 0, 0, 75, 500, 1.3, 1.6)
     dda = 3 * apq3
 
-    # Harmonics-to-noise ratio (HNR)
     hnr = parselmouth.praat.call(sound, "To Harmonicity (cc)", 0.01, 75, 0.1, 1.0)
     HNR = parselmouth.praat.call(hnr, "Get mean", 0, 0)
 
-    # Noise-to-harmonics ratio (NHR)
     NHR = 1 / (1 + 10 ** (HNR / 10))
 
-    # Combine into DataFrame
     features = {
         "Fo(Hz)": Fo,
         "Fhi(Hz)": Fhi,
@@ -64,7 +59,6 @@ def extract_classification_features(audio_path: str) -> pd.DataFrame:
 if __name__ == "__main__":
     df = extract_classification_features("audio_samples/audio.wav")
 
-    # Save the extracted features for pipeline use
     save_path = "data_storage/classification_features.csv"
     df.to_csv(save_path, index=False)
     print(f"✅ Classification features saved at: {save_path}")

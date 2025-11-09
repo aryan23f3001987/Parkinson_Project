@@ -8,18 +8,15 @@ def scale_features(df: pd.DataFrame, scaler_path: str = "models/scaler.pkl") -> 
     Saves scaler if not present, else loads it.
     """
     try:
-        # Try loading an existing scaler
         with open(scaler_path, "rb") as f:
             scaler = pickle.load(f)
     except FileNotFoundError:
-        # Create a new scaler if one doesn't exist (only during initial training)
         scaler = StandardScaler()
         scaler.fit(df)
         with open(scaler_path, "wb") as f:
             pickle.dump(scaler, f)
         print("✅ New scaler fitted and saved.")
 
-    # Apply scaling
     scaled_data = scaler.transform(df)
     scaled_df = pd.DataFrame(scaled_data, columns=df.columns)
 

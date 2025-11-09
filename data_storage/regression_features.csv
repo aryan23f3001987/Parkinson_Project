@@ -1,0 +1,2 @@
+age,sex,test_time,Jitter(%),Jitter(Abs),Jitter:RAP,Jitter:PPQ5,Jitter:DDP,Shimmer,Shimmer(dB),Shimmer:APQ3,Shimmer:APQ5,Shimmer:APQ11,Shimmer:DDA,NHR,HNR,RPDE,DFA,PPE
+70,0,50.0,,,,,,,,,,,,0.09677425665523075,9.700364630740438,0.0,0.0,

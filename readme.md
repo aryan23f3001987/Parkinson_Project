@@ -1,10 +1,12 @@
 <div align="center">
-🎙️ Parkinson's Disease Detection System
+# 🎙️ Parkinson's Disease Detection System
+
 An AI-powered web application that analyzes voice recordings to detect potential signs of Parkinson's Disease using machine learning models. The system provides real-time audio visualization and detailed analysis including UPDRS scores and probability assessments.
-Show Image
-Show Image
-Show Image
-Show Image
+
+![Parkinson's Detection System](https://img.shields.io/badge/Status-Active-success)
+![Python](https://img.shields.io/badge/Python-3.8+-blue)
+![Flask](https://img.shields.io/badge/Flask-2.0+-green)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.0+-orange)
 </div>
 
 ## 📋 Table of Contents

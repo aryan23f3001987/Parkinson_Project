@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parkinson's Detection System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            top: -200px;
+            left: -200px;
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+            bottom: -150px;
+            right: -150px;
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            background: rgba(17, 17, 17, 0.95);
+            border-radius: 24px;
+            padding: 50px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                        0 0 0 1px rgba(255, 255, 255, 0.05);
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(20px);
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            font-size: 2.5em;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #9ca3af;
+            margin-bottom: 40px;
+            font-size: 1em;
+            font-weight: 400;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #e5e7eb;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(31, 41, 55, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 16px;
+            color: #f9fafb;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: rgba(31, 41, 55, 0.7);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        input::placeholder {
+            color: #6b7280;
+        }
+
+        select option {
+            background: #1f2937;
+            color: #f9fafb;
+        }
+
+        .visualizer {
+            height: 100px;
+            background: rgba(31, 41, 55, 0.3);
+            border-radius: 16px;
+            margin: 30px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bar {
+            width: 6px;
+            background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 3px;
+            transition: height 0.1s ease;
+            height: 15px;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .record-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .record-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 18px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .record-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .record-btn:hover::before {
+            left: 100%;
+        }
+
+        .record-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
+        }
+
+        .record-btn:active {
+            transform: translateY(0);
+        }
+
+        .record-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .record-btn.recording {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            animation: recordPulse 2s infinite;
+        }
+
+        @keyframes recordPulse {
+            0%, 100% { box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 15px 45px rgba(239, 68, 68, 0.7); }
+        }
+
+        .timer {
+            font-size: 56px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.05em;
+        }
+
+        .status {
+            text-align: center;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-weight: 500;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status.analyzing {
+            background: rgba(251, 191, 36, 0.1);
+            color: #fbbf24;
+            border-color: rgba(251, 191, 36, 0.2);
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 0;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item {
+            margin: 16px 0;
+            padding: 20px 24px;
+            background: rgba(31, 41, 55, 0.5);
+            border-radius: 12px;
+            border-left: 4px solid #6366f1;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            background: rgba(31, 41, 55, 0.7);
+            transform: translateX(4px);
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #f9fafb;
+            margin-top: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .result-value.healthy {
+            color: #10b981;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .result-value.minor {
+            color: #fbbf24;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .result-value.moderate {
+            color: #f97316;
+            text-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+        }
+
+        .result-value.severe {
+            color: #ef4444;
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            display: none;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .error.show {
+            display: block;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(31, 41, 55, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎙️ Parkinson's Detection</h1>
+        <p class="subtitle">AI-Powered Voice Analysis System</p>
+
+        <div class="input-group">
+            <label for="age">Age</label>
+            <input type="number" id="age" value="70" min="1" max="120" placeholder="Enter age">
+        </div>
+
+        <div class="input-group">
+            <label for="sex">Gender</label>
+            <select id="sex">
+                <option value="0">Male</option>
+                <option value="1">Female</option>
+            </select>
+        </div>
+
+        <div class="visualizer" id="visualizer">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+
+        <div class="record-section">
+            <button class="record-btn" id="recordBtn">🎤 Start Recording</button>
+            <div class="timer" id="timer">10</div>
+        </div>
+
+        <div class="status" id="status"></div>
+        <div class="error" id="error"></div>
+
+        <div class="results" id="results">
+            <div class="result-item">
+                <div class="result-label">Diagnosis</div>
+                <div class="result-value" id="diagnosis">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Probability</div>
+                <div class="result-value" id="probability">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Motor UPDRS Score</div>
+                <div class="result-value" id="motorScore">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Total UPDRS Score</div>
+                <div class="result-value" id="totalScore">-</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordingTimer;
+        let timeLeft = 10;
+        let audioContext;
+        let analyser;
+        let dataArray;
+        let isRecording = false;
+
+        const recordBtn = document.getElementById('recordBtn');
+        const timerDisplay = document.getElementById('timer');
+        const statusDiv = document.getElementById('status');
+        const errorDiv = document.getElementById('error');
+        const resultsDiv = document.getElementById('results');
+        const visualizer = document.getElementById('visualizer');
+        const bars = visualizer.querySelectorAll('.bar');
+
+        console.log('Page loaded successfully!');
+
+        recordBtn.addEventListener('click', toggleRecording);
+
+        async function toggleRecording() {
+            if (!isRecording) {
+                await startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                console.log('Requesting microphone access...');
+                
+                // Clear previous results and errors when starting new recording
+                hideResults();
+                hideError();
+                hideStatus();
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('Microphone access granted!');
+                
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                source.connect(analyser);
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                
+                visualize();
+
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                isRecording = true;
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    console.log('Recording stopped, creating audio blob...');
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    console.log('Audio blob created:', audioBlob.size, 'bytes');
+                    
+                    const wavBlob = await convertToWav(audioBlob);
+                    console.log('Converted to WAV:', wavBlob.size, 'bytes');
+                    
+                    await sendAudioForAnalysis(wavBlob);
+                    stream.getTracks().forEach(track => track.stop());
+                    if (audioContext) {
+                        audioContext.close();
+                    }
+                    isRecording = false;
+                };
+
+                mediaRecorder.start();
+                recordBtn.textContent = '⏹️ Recording...';
+                recordBtn.classList.add('recording');
+                recordBtn.disabled = true;
+
+                timeLeft = 10;
+                timerDisplay.textContent = timeLeft;
+
+                recordingTimer = setInterval(() => {
+                    timeLeft--;
+                    timerDisplay.textContent = timeLeft;
+
+                    if (timeLeft <= 0) {
+                        stopRecording();
+                    }
+                }, 1000);
+
+            } catch (error) {
+                showError('🚫 Microphone access denied. Please allow microphone access and try again.');
+                console.error('Error accessing microphone:', error);
+                isRecording = false;
+            }
+        }
+
+        function visualize() {
+            if (!analyser) return;
+
+            function draw() {
+                if (!analyser) return;
+                
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+
+                bars.forEach((bar, i) => {
+                    const index = Math.floor(i * dataArray.length / bars.length);
+                    const value = dataArray[index];
+                    const height = (value / 255) * 70;
+                    bar.style.height = Math.max(height, 15) + 'px';
+                });
+            }
+
+            draw();
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                console.log('Stopping recording...');
+                clearInterval(recordingTimer);
+                mediaRecorder.stop();
+                recordBtn.textContent = '⏳ Processing...';
+                recordBtn.classList.remove('recording');
+                timerDisplay.textContent = '10';
+                showStatus('🔍 Analyzing audio with AI...', 'analyzing');
+            }
+        }
+
+        async function sendAudioForAnalysis(audioBlob) {
+            const formData = new FormData();
+            
+            // Generate unique filename with timestamp
+            const timestamp = Date.now();
+            formData.append('audio', audioBlob, `recording_${timestamp}.wav`);
+            formData.append('age', document.getElementById('age').value);
+            
+            const sexValue = document.getElementById('sex').value;
+            formData.append('sex', sexValue === '0' ? 'male' : 'female');
+            
+            formData.append('test_time', '10.0');
+
+            console.log('Sending audio for analysis with timestamp:', timestamp);
+
+            try {
+                const response = await fetch(`/analyze?nocache=${Date.now()}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error('Analysis failed: ' + errorText);
+                }
+
+                const result = await response.json();
+                console.log('Analysis result:', result);
+                displayResults(result);
+                hideStatus();
+                recordBtn.textContent = '🎤 Start Recording';
+                recordBtn.disabled = false;
+
+            } catch (error) {
+                hideStatus();
+                showError('❌ Failed to analyze audio: ' + error.message);
+                console.error('Analysis error:', error);
+                recordBtn.textContent = '🎤 Start Recording';
+                recordBtn.disabled = false;
+            }
+        }
+
+        function displayResults(result) {
+            const diagnosisEl = document.getElementById('diagnosis');
+            const probabilityEl = document.getElementById('probability');
+            const motorScoreEl = document.getElementById('motorScore');
+            const totalScoreEl = document.getElementById('totalScore');
+
+            // Display diagnosis with appropriate color class
+            const status = result.status || 'Unknown';
+            diagnosisEl.textContent = status;
+            
+            // Set color based on severity
+            diagnosisEl.className = 'result-value';
+            if (status === 'Healthy') {
+                diagnosisEl.classList.add('healthy');
+            } else if (status.includes('Minor')) {
+                diagnosisEl.classList.add('minor');
+            } else if (status.includes('Moderate')) {
+                diagnosisEl.classList.add('moderate');
+            } else if (status.includes('Severe')) {
+                diagnosisEl.classList.add('severe');
+            }
+
+            // Display probability
+            if (result.probability !== undefined) {
+                probabilityEl.textContent = (result.probability * 100).toFixed(1) + '%';
+            } else {
+                probabilityEl.textContent = 'N/A';
+            }
+
+            // Display UPDRS scores
+            motorScoreEl.textContent = result.motor_updrs !== undefined ? result.motor_updrs : 'N/A';
+            totalScoreEl.textContent = result.total_updrs !== undefined ? result.total_updrs : 'N/A';
+
+            resultsDiv.classList.add('show');
+        }
+
+        function showStatus(message, className) {
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + className + ' show';
+        }
+
+        function hideStatus() {
+            statusDiv.classList.remove('show');
+        }
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function hideError() {
+            errorDiv.classList.remove('show');
+        }
+
+        function hideResults() {
+            resultsDiv.classList.remove('show');
+        }
+
+        async function convertToWav(blob) {
+            const arrayBuffer = await blob.arrayBuffer();
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            
+            const wavBuffer = audioBufferToWav(audioBuffer);
+            const wavBlob = new Blob([wavBuffer], { type: 'audio/wav' });
+            
+            audioContext.close();
+            return wavBlob;
+        }
+
+        function audioBufferToWav(buffer) {
+            const numOfChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const format = 1;
+            const bitDepth = 16;
+            
+            let length = buffer.length * numOfChannels * 2;
+            let result = new ArrayBuffer(44 + length);
+            let view = new DataView(result);
+            
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + length, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, format, true);
+            view.setUint16(22, numOfChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * numOfChannels * bitDepth / 8, true);
+            view.setUint16(32, numOfChannels * bitDepth / 8, true);
+            view.setUint16(34, bitDepth, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, length, true);
+            
+            let offset = 44;
+            for (let i = 0; i < buffer.length; i++) {
+                for (let channel = 0; channel < numOfChannels; channel++) {
+                    let sample = buffer.getChannelData(channel)[i];
+                    sample = Math.max(-1, Math.min(1, sample));
+                    sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                    view.setInt16(offset, sample, true);
+                    offset += 2;
+                }
+            }
+            
+            return result;
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        console.log('All elements found:', {
+            recordBtn: !!recordBtn,
+            timerDisplay: !!timerDisplay,
+            statusDiv: !!statusDiv,
+            errorDiv: !!errorDiv,
+            resultsDiv: !!resultsDiv
+        });
+    </script>
+</body>
+</html>

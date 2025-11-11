@@ -3,3 +3,7 @@ scikit-learn
 numpy
 praat-parselmouth
 matplotlib
+flask
+flask-cors
+librosa
+soundfile

@@ -121,6 +121,7 @@
 #     print("----------------------------------")
     
 #     app.run(debug=True, host='0.0.0.0', port=5000)
+
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import pandas as pd
@@ -131,11 +132,48 @@ from utils.load_models import load_model
 import constants
 import os
 import time
+import librosa
+from pydub import AudioSegment
 
 app = Flask(__name__)
 CORS(app)
 
 AUDIO_PATH = "audio_samples/audio.wav"
+
+
+def convert_to_wav(input_path, output_path):
+    """Convert uploaded audio (mp3, m4a, etc.) to WAV format."""
+    try:
+        audio = AudioSegment.from_file(input_path)
+        audio.export(output_path, format="wav")
+        print(f"🎧 Converted to WAV: {output_path}")
+    except Exception as e:
+        raise RuntimeError(f"Audio conversion failed: {e}")
+
+
+def calculate_test_time(audio_path):
+    """Calculate duration of audio in seconds."""
+    try:
+        y, sr = librosa.load(audio_path)
+        duration = round(len(y) / sr, 2)
+        print(f"🕒 Extracted test_time: {duration} seconds")
+        return duration
+    except Exception as e:
+        print(f"⚠️ Failed to calculate duration: {e}")
+        return 10.0  # fallback
+
+
+def clean_audio_folder():  # 🧹 NEW FUNCTION
+    """Delete all previous audio files each time the page is refreshed."""
+    folder = "audio_samples"
+    deleted = 0
+    if os.path.exists(folder):
+        for file in os.listdir(folder):
+            file_path = os.path.join(folder, file)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                deleted += 1
+    print(f"🧹 Cleaned {deleted} old audio files.")
 
 
 def run_pipeline(audio_path=AUDIO_PATH, age=70, sex=0, test_time=50.0):
@@ -208,6 +246,7 @@ def run_pipeline(audio_path=AUDIO_PATH, age=70, sex=0, test_time=50.0):
 
 @app.route('/')
 def index():
+    clean_audio_folder()  # 🧹 Automatically clean old files on refresh or first visit
     return render_template('index.html')
 
 
@@ -218,24 +257,41 @@ def analyze():
         if not audio_file:
             return jsonify({'error': 'No audio file provided'}), 400
 
+        # ✅ Get user-provided data
         age = int(request.form.get('age', 70))
         sex_str = request.form.get('sex', 'male').lower()
-        test_time = float(request.form.get('test_time', 50.0))
+        user_test_time = request.form.get('test_time', None)
         sex = 1 if sex_str in ['male', 'm', '1'] else 0
 
-        audio_save_path = os.path.join('audio_samples', f"audio_{int(time.time())}.wav")
-        if os.path.exists(audio_save_path):
-            os.remove(audio_save_path)
-        audio_file.save(audio_save_path)
-        print(f"💾 New audio saved: {audio_save_path}")
+        # Save uploaded/recorded audio
+        file_ext = os.path.splitext(audio_file.filename)[1].lower()
+        raw_audio_path = os.path.join('audio_samples', f"audio_raw_{int(time.time())}{file_ext}")
+        wav_audio_path = os.path.join('audio_samples', f"audio_{int(time.time())}.wav")
+        audio_file.save(raw_audio_path)
+        print(f"💾 Audio saved: {raw_audio_path}")
 
-        proba = run_pipeline(audio_save_path, age, sex, test_time)
+        # Convert to WAV if needed
+        if file_ext != ".wav":
+            convert_to_wav(raw_audio_path, wav_audio_path)
+        else:
+            wav_audio_path = raw_audio_path
+
+        # Determine test_time
+        if user_test_time:
+            test_time = float(user_test_time)
+            print(f"🧮 Using user-provided test_time: {test_time}")
+        else:
+            test_time = calculate_test_time(wav_audio_path)
+
+        # Run prediction pipeline
+        proba = run_pipeline(wav_audio_path, age, sex, test_time)
 
         response = jsonify({
             'status': constants.PARKINSON_STATUS,
             'probability': round(proba, 3),
             'motor_updrs': constants.MOTOR_UPDRS_SCORE,
-            'total_updrs': constants.TOTAL_UPDRS_SCORE
+            'total_updrs': constants.TOTAL_UPDRS_SCORE,
+            'test_time': test_time
         })
         response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
         response.headers['Pragma'] = 'no-cache'

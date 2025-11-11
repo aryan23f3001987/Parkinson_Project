@@ -10,7 +10,6 @@ An AI-powered web application that analyzes voice recordings to detect potential
 ## 📋 Table of Contents
 - [Features](#features)
 - [Technology Stack](#technology-stack)
-- [System Requirements](#system-requirements)
 - [Installation](#installation)
 - [Usage](#usage)
 - [How It Works](#how-it-works)
@@ -19,7 +18,6 @@ An AI-powered web application that analyzes voice recordings to detect potential
 - [Model Information](#model-information)
 - [Troubleshooting](#troubleshooting)
 - [Disclaimer](#disclaimer)
-- [License](#license)
 
 ## ✨ Features
 
@@ -61,19 +59,6 @@ An AI-powered web application that analyzes voice recordings to detect potential
 - **Vanilla JavaScript** - Interactive functionality
 - **Canvas API** - Audio visualization
 - **Web Audio API** - Audio processing
-
-## 💻 System Requirements
-
-### Minimum Requirements
-- **OS**: Windows 10/11, macOS 10.14+, or Linux (Ubuntu 18.04+)
-- **RAM**: 4GB (8GB recommended)
-- **Storage**: 500MB free space
-- **Python**: 3.8 or higher
-- **Browser**: Chrome 90+, Firefox 88+, Safari 14+, or Edge 90+
-
-### Additional Requirements
-- Microphone access (for live recording)
-- Internet connection (for initial setup only)
 
 ## 📦 Installation
 

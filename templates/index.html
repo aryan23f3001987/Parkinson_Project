@@ -81,9 +81,26 @@
         .subtitle {
             text-align: center;
             color: #9ca3af;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             font-size: 1em;
             font-weight: 400;
+        }
+
+        .refresh-note {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #fbbf24;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .refresh-note::before {
+            content: '⚠️ ';
+            font-size: 1.1em;
         }
 
         .input-group {
@@ -125,34 +142,115 @@
             color: #f9fafb;
         }
 
-        .visualizer {
-            height: 100px;
+        .mode-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            padding: 6px;
             background: rgba(31, 41, 55, 0.3);
             border-radius: 16px;
-            margin: 30px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            padding: 20px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .bar {
-            width: 6px;
-            background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%);
-            border-radius: 3px;
-            transition: height 0.1s ease;
-            height: 15px;
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+        .mode-btn {
+            flex: 1;
+            padding: 14px;
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 15px;
         }
 
-        .record-section {
+        .mode-btn.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: rgba(99, 102, 241, 0.1);
+            color: #e5e7eb;
+        }
+
+        .upload-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 40px 20px;
             text-align: center;
-            margin: 40px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 30px 0;
+            background: rgba(31, 41, 55, 0.3);
         }
 
-        .record-btn {
+        .upload-zone:hover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .upload-zone.drag-over {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            color: #e5e7eb;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .file-name {
+            color: #10b981;
+            font-weight: 600;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .visualizer {
+            height: 120px;
+            background: rgba(31, 41, 55, 0.3);
+            border-radius: 16px;
+            margin: 30px 0;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visualizer-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .record-section, .upload-section {
+            display: none;
+        }
+
+        .record-section.active, .upload-section.active {
+            display: block;
+        }
+
+        .record-btn, .analyze-btn {
+            width: 100%;
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
             border: none;
@@ -165,9 +263,10 @@
             box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
             position: relative;
             overflow: hidden;
+            margin-top: 20px;
         }
 
-        .record-btn::before {
+        .record-btn::before, .analyze-btn::before {
             content: '';
             position: absolute;
             top: 0;
@@ -178,20 +277,20 @@
             transition: left 0.5s;
         }
 
-        .record-btn:hover::before {
+        .record-btn:hover::before, .analyze-btn:hover::before {
             left: 100%;
         }
 
-        .record-btn:hover {
+        .record-btn:hover, .analyze-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
         }
 
-        .record-btn:active {
+        .record-btn:active, .analyze-btn:active {
             transform: translateY(0);
         }
 
-        .record-btn:disabled {
+        .record-btn:disabled, .analyze-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
@@ -216,6 +315,7 @@
             margin: 20px 0;
             font-family: 'Courier New', monospace;
             letter-spacing: 0.05em;
+            text-align: center;
         }
 
         .status {
@@ -343,6 +443,65 @@
             75% { transform: translateX(10px); }
         }
 
+        .info-box {
+            background: rgba(31, 41, 55, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 30px;
+        }
+
+        .info-box h3 {
+            color: #6366f1;
+            font-size: 1.1em;
+            margin-bottom: 16px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .info-item {
+            margin-bottom: 16px;
+            padding-left: 24px;
+            position: relative;
+            color: #d1d5db;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-item::before {
+            content: '•';
+            position: absolute;
+            left: 8px;
+            color: #6366f1;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .info-item strong {
+            color: #f9fafb;
+            font-weight: 600;
+        }
+
+        .info-item.warning {
+            color: #fbbf24;
+        }
+
+        .info-item.warning strong {
+            color: #fbbf24;
+        }
+
+        .info-item.critical {
+            color: #ef4444;
+        }
+
+        .info-item.critical strong {
+            color: #ef4444;
+        }
+
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -365,6 +524,10 @@
     <div class="container">
         <h1>🎙️ Parkinson's Detection</h1>
         <p class="subtitle">AI-Powered Voice Analysis System</p>
+        
+        <div class="refresh-note">
+            Please refresh the page before each new recording or upload
+        </div>
 
         <div class="input-group">
             <label for="age">Age</label>
@@ -379,27 +542,36 @@
             </select>
         </div>
 
-        <div class="visualizer" id="visualizer">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
+        <div class="mode-selector">
+            <button class="mode-btn active" id="recordModeBtn">🎤 Record Audio</button>
+            <button class="mode-btn" id="uploadModeBtn">📁 Upload Audio</button>
         </div>
 
-        <div class="record-section">
-            <button class="record-btn" id="recordBtn">🎤 Start Recording</button>
+        <!-- RECORD MODE -->
+        <div class="record-section active" id="recordSection">
+            <div class="input-group">
+                <label for="testTime">Recording Duration (seconds)</label>
+                <input type="number" id="testTime" value="10" min="5" max="60" step="1" placeholder="Enter duration">
+            </div>
+
+            <div class="visualizer" id="visualizer">
+                <canvas class="visualizer-canvas" id="visualizerCanvas"></canvas>
+            </div>
+
             <div class="timer" id="timer">10</div>
+            <button class="record-btn" id="recordBtn">🎤 Start Recording</button>
+        </div>
+
+        <!-- UPLOAD MODE -->
+        <div class="upload-section" id="uploadSection">
+            <input type="file" id="fileInput" accept="audio/*">
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">📤</div>
+                <div class="upload-text">Click to upload or drag & drop</div>
+                <div class="upload-subtext">Supports WAV, MP3, M4A and other audio formats</div>
+                <div class="file-name" id="fileName"></div>
+            </div>
+            <button class="analyze-btn" id="analyzeBtn" disabled>🔍 Analyze Audio</button>
         </div>
 
         <div class="status" id="status"></div>
@@ -423,6 +595,19 @@
                 <div class="result-value" id="totalScore">-</div>
             </div>
         </div>
+
+        <div class="info-box">
+            <h3>📋 Important Information</h3>
+            <div class="info-item warning">
+                <strong>Age Accuracy:</strong> Please enter your age carefully and accurately. The model's predictions are highly dependent on the age parameter, and incorrect age input may lead to inaccurate results.
+            </div>
+            <div class="info-item">
+                <strong>UPDRS Scores:</strong> The Unified Parkinson's Disease Rating Scale (UPDRS) is a clinical assessment tool. Motor UPDRS measures movement symptoms (tremor, rigidity, bradykinesia), while Total UPDRS includes additional non-motor symptoms. Higher scores indicate more severe symptoms.
+            </div>
+            <div class="info-item critical">
+                <strong>Medical Disclaimer:</strong> This AI model is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider or neurologist for proper evaluation and diagnosis. Do not make medical decisions based solely on this tool.
+            </div>
+        </div>
     </div>
 
     <script>
@@ -434,21 +619,337 @@
         let analyser;
         let dataArray;
         let isRecording = false;
+        let uploadedFile = null;
+        let currentMode = 'record';
+        let staticAnimationId = null;
 
         const recordBtn = document.getElementById('recordBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
         const timerDisplay = document.getElementById('timer');
         const statusDiv = document.getElementById('status');
         const errorDiv = document.getElementById('error');
         const resultsDiv = document.getElementById('results');
         const visualizer = document.getElementById('visualizer');
-        const bars = visualizer.querySelectorAll('.bar');
+        const canvas = document.getElementById('visualizerCanvas');
+        const canvasCtx = canvas ? canvas.getContext('2d') : null;
+        const testTimeInput = document.getElementById('testTime');
 
-        console.log('Page loaded successfully!');
+        const recordModeBtn = document.getElementById('recordModeBtn');
+        const uploadModeBtn = document.getElementById('uploadModeBtn');
+        const recordSection = document.getElementById('recordSection');
+        const uploadSection = document.getElementById('uploadSection');
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+
+        // Setup canvas dimensions
+        if (canvas) {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            // Start static visualization immediately
+            startStaticVisualization();
+        }
+
+        recordModeBtn.addEventListener('click', () => switchMode('record'));
+        uploadModeBtn.addEventListener('click', () => switchMode('upload'));
+
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            if (mode === 'record') {
+                recordModeBtn.classList.add('active');
+                uploadModeBtn.classList.remove('active');
+                recordSection.classList.add('active');
+                uploadSection.classList.remove('active');
+            } else {
+                uploadModeBtn.classList.add('active');
+                recordModeBtn.classList.remove('active');
+                uploadSection.classList.add('active');
+                recordSection.classList.remove('active');
+            }
+
+            hideResults();
+            hideError();
+            hideStatus();
+        }
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('drag-over');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('drag-over');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (!file.type.startsWith('audio/')) {
+                showError('❌ Please select a valid audio file');
+                return;
+            }
+
+            uploadedFile = file;
+            fileName.textContent = `✓ ${file.name}`;
+            analyzeBtn.disabled = false;
+            hideError();
+            hideResults();
+        }
+
+        analyzeBtn.addEventListener('click', async () => {
+            if (!uploadedFile) {
+                showError('❌ Please select an audio file first');
+                return;
+            }
+
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = '⏳ Processing...';
+            showStatus('🔍 Analyzing audio with AI...', 'analyzing');
+
+            await sendAudioForAnalysis(uploadedFile, null);
+        });
 
         recordBtn.addEventListener('click', toggleRecording);
 
+        testTimeInput.addEventListener('input', () => {
+            timeLeft = parseInt(testTimeInput.value) || 10;
+            timerDisplay.textContent = timeLeft;
+        });
+
+        // Static visualization when not recording
+        function startStaticVisualization() {
+            if (!canvasCtx) return;
+
+            let particleArray = [];
+            let time = 0;
+
+            // Create particles
+            for (let i = 0; i < 30; i++) {
+                particleArray.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2 + 1,
+                    speedX: (Math.random() - 0.5) * 0.5,
+                    speedY: (Math.random() - 0.5) * 0.5,
+                    opacity: Math.random() * 0.5 + 0.3
+                });
+            }
+
+            function drawStatic() {
+                if (!canvasCtx || isRecording) return;
+                
+                time += 0.02;
+
+                // Background gradient
+                const bgGradient = canvasCtx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                bgGradient.addColorStop(0, 'rgba(17, 24, 39, 0.95)');
+                bgGradient.addColorStop(1, 'rgba(31, 41, 55, 0.95)');
+                canvasCtx.fillStyle = bgGradient;
+                canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw particles
+                particleArray.forEach(particle => {
+                    canvasCtx.fillStyle = `rgba(99, 102, 241, ${particle.opacity})`;
+                    canvasCtx.beginPath();
+                    canvasCtx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    canvasCtx.fill();
+
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+
+                    if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1;
+                    if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1;
+                });
+
+                // Draw animated sine wave
+                canvasCtx.beginPath();
+                canvasCtx.lineWidth = 3;
+                canvasCtx.shadowBlur = 15;
+                
+                const gradient = canvasCtx.createLinearGradient(0, 0, canvas.width, 0);
+                gradient.addColorStop(0, '#6366f1');
+                gradient.addColorStop(0.3, '#8b5cf6');
+                gradient.addColorStop(0.6, '#a855f7');
+                gradient.addColorStop(1, '#ec4899');
+                canvasCtx.strokeStyle = gradient;
+                canvasCtx.shadowColor = '#8b5cf6';
+
+                const amplitude = canvas.height * 0.2;
+                const frequency = 0.015;
+                const centerY = canvas.height / 2;
+
+                for (let x = 0; x < canvas.width; x++) {
+                    const y = centerY + Math.sin(x * frequency + time) * amplitude;
+                    if (x === 0) {
+                        canvasCtx.moveTo(x, y);
+                    } else {
+                        canvasCtx.lineTo(x, y);
+                    }
+                }
+
+                canvasCtx.stroke();
+
+                // Glowing dots
+                for (let x = 0; x < canvas.width; x += 50) {
+                    const y = centerY + Math.sin(x * frequency + time) * amplitude;
+                    
+                    canvasCtx.beginPath();
+                    canvasCtx.arc(x, y, 2.5, 0, Math.PI * 2);
+                    const dotGradient = canvasCtx.createRadialGradient(x, y, 0, x, y, 8);
+                    dotGradient.addColorStop(0, 'rgba(236, 72, 153, 0.9)');
+                    dotGradient.addColorStop(1, 'rgba(236, 72, 153, 0)');
+                    canvasCtx.fillStyle = dotGradient;
+                    canvasCtx.fill();
+                }
+
+                canvasCtx.shadowBlur = 0;
+                staticAnimationId = requestAnimationFrame(drawStatic);
+            }
+
+            drawStatic();
+        }
+
+        // Live recording visualization
+        function visualizeLive() {
+            if (!analyser || !canvasCtx) return;
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            const frequencyData = new Uint8Array(bufferLength);
+            let particleArray = [];
+            let time = 0;
+
+            // Create particles
+            for (let i = 0; i < 30; i++) {
+                particleArray.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2 + 1,
+                    speedX: (Math.random() - 0.5) * 0.5,
+                    speedY: (Math.random() - 0.5) * 0.5,
+                    opacity: Math.random() * 0.5 + 0.3
+                });
+            }
+
+            function draw() {
+                if (!analyser || !canvasCtx || !isRecording) return;
+                
+                requestAnimationFrame(draw);
+                analyser.getByteTimeDomainData(dataArray);
+                analyser.getByteFrequencyData(frequencyData);
+                time += 0.01;
+
+                // Background
+                const bgGradient = canvasCtx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                bgGradient.addColorStop(0, 'rgba(17, 24, 39, 0.95)');
+                bgGradient.addColorStop(1, 'rgba(31, 41, 55, 0.95)');
+                canvasCtx.fillStyle = bgGradient;
+                canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Particles
+                particleArray.forEach(particle => {
+                    canvasCtx.fillStyle = `rgba(99, 102, 241, ${particle.opacity})`;
+                    canvasCtx.beginPath();
+                    canvasCtx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    canvasCtx.fill();
+
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+
+                    if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1;
+                    if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1;
+                });
+
+                // Frequency bars
+                const barCount = 64;
+                const barWidth = canvas.width / barCount;
+                for (let i = 0; i < barCount; i++) {
+                    const barHeight = Math.min((frequencyData[i] / 255) * canvas.height * 0.4, canvas.height * 0.35);
+                    const gradient = canvasCtx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
+                    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.15)');
+                    gradient.addColorStop(1, 'rgba(139, 92, 246, 0.25)');
+                    canvasCtx.fillStyle = gradient;
+                    canvasCtx.fillRect(i * barWidth, canvas.height - barHeight, barWidth * 0.8, barHeight);
+                }
+
+                // Main waveform
+                canvasCtx.beginPath();
+                canvasCtx.lineWidth = 3;
+                canvasCtx.shadowBlur = 20;
+                
+                const gradient = canvasCtx.createLinearGradient(0, 0, canvas.width, 0);
+                gradient.addColorStop(0, '#6366f1');
+                gradient.addColorStop(0.3, '#8b5cf6');
+                gradient.addColorStop(0.6, '#a855f7');
+                gradient.addColorStop(1, '#ec4899');
+                canvasCtx.strokeStyle = gradient;
+                canvasCtx.shadowColor = '#8b5cf6';
+
+                const sliceWidth = canvas.width / bufferLength;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    const v = dataArray[i] / 128.0;
+                    const clampedV = Math.max(0.4, Math.min(1.6, v));
+                    const y = (clampedV * canvas.height) / 2;
+
+                    if (i === 0) {
+                        canvasCtx.moveTo(x, y);
+                    } else {
+                        canvasCtx.lineTo(x, y);
+                    }
+
+                    x += sliceWidth;
+                }
+
+                canvasCtx.stroke();
+
+                // Peak dots
+                for (let i = 0; i < bufferLength; i += 20) {
+                    const v = dataArray[i] / 128.0;
+                    const clampedV = Math.max(0.4, Math.min(1.6, v));
+                    const x = (i / bufferLength) * canvas.width;
+                    const y = (clampedV * canvas.height) / 2;
+                    const intensity = Math.abs(v - 1);
+
+                    if (intensity > 0.2) {
+                        canvasCtx.beginPath();
+                        canvasCtx.arc(x, y, 3, 0, Math.PI * 2);
+                        const dotGradient = canvasCtx.createRadialGradient(x, y, 0, x, y, 6);
+                        dotGradient.addColorStop(0, 'rgba(236, 72, 153, 0.9)');
+                        dotGradient.addColorStop(1, 'rgba(236, 72, 153, 0)');
+                        canvasCtx.fillStyle = dotGradient;
+                        canvasCtx.fill();
+                    }
+                }
+
+                canvasCtx.shadowBlur = 0;
+            }
+
+            draw();
+        }
+
         async function toggleRecording() {
             if (!isRecording) {
+                resultsDiv.classList.remove('show');
+                statusDiv.classList.remove('show');
+                errorDiv.classList.remove('show');
                 await startRecording();
             } else {
                 stopRecording();
@@ -459,10 +960,15 @@
             try {
                 console.log('Requesting microphone access...');
                 
-                // Clear previous results and errors when starting new recording
                 hideResults();
                 hideError();
                 hideStatus();
+                
+                // Stop static animation
+                if (staticAnimationId) {
+                    cancelAnimationFrame(staticAnimationId);
+                    staticAnimationId = null;
+                }
                 
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 console.log('Microphone access granted!');
@@ -470,15 +976,15 @@
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const source = audioContext.createMediaStreamSource(stream);
                 analyser = audioContext.createAnalyser();
-                analyser.fftSize = 256;
+                analyser.fftSize = 2048;
                 source.connect(analyser);
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
                 
-                visualize();
+                isRecording = true;
+                visualizeLive();
 
                 mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
-                isRecording = true;
 
                 mediaRecorder.ondataavailable = (event) => {
                     audioChunks.push(event.data);
@@ -492,12 +998,15 @@
                     const wavBlob = await convertToWav(audioBlob);
                     console.log('Converted to WAV:', wavBlob.size, 'bytes');
                     
-                    await sendAudioForAnalysis(wavBlob);
+                    const userTestTime = testTimeInput.value;
+                    await sendAudioForAnalysis(wavBlob, userTestTime);
+                    
                     stream.getTracks().forEach(track => track.stop());
                     if (audioContext) {
                         audioContext.close();
                     }
                     isRecording = false;
+                    startStaticVisualization();
                 };
 
                 mediaRecorder.start();
@@ -505,7 +1014,7 @@
                 recordBtn.classList.add('recording');
                 recordBtn.disabled = true;
 
-                timeLeft = 10;
+                timeLeft = parseInt(testTimeInput.value) || 10;
                 timerDisplay.textContent = timeLeft;
 
                 recordingTimer = setInterval(() => {
@@ -521,27 +1030,8 @@
                 showError('🚫 Microphone access denied. Please allow microphone access and try again.');
                 console.error('Error accessing microphone:', error);
                 isRecording = false;
+                startStaticVisualization();
             }
-        }
-
-        function visualize() {
-            if (!analyser) return;
-
-            function draw() {
-                if (!analyser) return;
-                
-                requestAnimationFrame(draw);
-                analyser.getByteFrequencyData(dataArray);
-
-                bars.forEach((bar, i) => {
-                    const index = Math.floor(i * dataArray.length / bars.length);
-                    const value = dataArray[index];
-                    const height = (value / 255) * 70;
-                    bar.style.height = Math.max(height, 15) + 'px';
-                });
-            }
-
-            draw();
         }
 
         function stopRecording() {
@@ -551,15 +1041,14 @@
                 mediaRecorder.stop();
                 recordBtn.textContent = '⏳ Processing...';
                 recordBtn.classList.remove('recording');
-                timerDisplay.textContent = '10';
+                timerDisplay.textContent = testTimeInput.value || '10';
                 showStatus('🔍 Analyzing audio with AI...', 'analyzing');
             }
         }
 
-        async function sendAudioForAnalysis(audioBlob) {
+        async function sendAudioForAnalysis(audioBlob, userTestTime) {
             const formData = new FormData();
             
-            // Generate unique filename with timestamp
             const timestamp = Date.now();
             formData.append('audio', audioBlob, `recording_${timestamp}.wav`);
             formData.append('age', document.getElementById('age').value);
@@ -567,9 +1056,12 @@
             const sexValue = document.getElementById('sex').value;
             formData.append('sex', sexValue === '0' ? 'male' : 'female');
             
-            formData.append('test_time', '10.0');
-
-            console.log('Sending audio for analysis with timestamp:', timestamp);
+            if (userTestTime) {
+                formData.append('test_time', userTestTime);
+                console.log('Sending with user-provided test_time:', userTestTime);
+            } else {
+                console.log('Letting backend calculate test_time from uploaded audio');
+            }
 
             try {
                 const response = await fetch(`/analyze?nocache=${Date.now()}`, {
@@ -589,15 +1081,27 @@
                 console.log('Analysis result:', result);
                 displayResults(result);
                 hideStatus();
-                recordBtn.textContent = '🎤 Start Recording';
-                recordBtn.disabled = false;
+                
+                if (currentMode === 'record') {
+                    recordBtn.textContent = '🎤 Start Recording';
+                    recordBtn.disabled = false;
+                } else {
+                    analyzeBtn.textContent = '🔍 Analyze Audio';
+                    analyzeBtn.disabled = false;
+                }
 
             } catch (error) {
                 hideStatus();
                 showError('❌ Failed to analyze audio: ' + error.message);
                 console.error('Analysis error:', error);
-                recordBtn.textContent = '🎤 Start Recording';
-                recordBtn.disabled = false;
+                
+                if (currentMode === 'record') {
+                    recordBtn.textContent = '🎤 Start Recording';
+                    recordBtn.disabled = false;
+                } else {
+                    analyzeBtn.textContent = '🔍 Analyze Audio';
+                    analyzeBtn.disabled = false;
+                }
             }
         }
 
@@ -607,11 +1111,9 @@
             const motorScoreEl = document.getElementById('motorScore');
             const totalScoreEl = document.getElementById('totalScore');
 
-            // Display diagnosis with appropriate color class
             const status = result.status || 'Unknown';
             diagnosisEl.textContent = status;
             
-            // Set color based on severity
             diagnosisEl.className = 'result-value';
             if (status === 'Healthy') {
                 diagnosisEl.classList.add('healthy');
@@ -623,14 +1125,12 @@
                 diagnosisEl.classList.add('severe');
             }
 
-            // Display probability
             if (result.probability !== undefined) {
                 probabilityEl.textContent = (result.probability * 100).toFixed(1) + '%';
             } else {
                 probabilityEl.textContent = 'N/A';
             }
 
-            // Display UPDRS scores
             motorScoreEl.textContent = result.motor_updrs !== undefined ? result.motor_updrs : 'N/A';
             totalScoreEl.textContent = result.total_updrs !== undefined ? result.total_updrs : 'N/A';
 
@@ -717,6 +1217,7 @@
 
         console.log('All elements found:', {
             recordBtn: !!recordBtn,
+            analyzeBtn: !!analyzeBtn,
             timerDisplay: !!timerDisplay,
             statusDiv: !!statusDiv,
             errorDiv: !!errorDiv,

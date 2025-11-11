@@ -1,3 +1,4 @@
+<div align="center">
 # 🎙️ Parkinson's Disease Detection System
 
 An AI-powered web application that analyzes voice recordings to detect potential signs of Parkinson's Disease using machine learning models. The system provides real-time audio visualization and detailed analysis including UPDRS scores and probability assessments.
@@ -18,6 +19,7 @@ An AI-powered web application that analyzes voice recordings to detect potential
 - [Model Information](#model-information)
 - [Troubleshooting](#troubleshooting)
 - [Disclaimer](#disclaimer)
+</div>
 
 ## ✨ Features
 

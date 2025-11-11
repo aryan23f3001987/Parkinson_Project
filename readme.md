@@ -326,10 +326,6 @@ This application is an AI-powered research tool and is **NOT** a substitute for 
 
 The accuracy of predictions depends on various factors including recording quality, user age accuracy, and model limitations. False positives and false negatives are possible.
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 👥 Contributing
 
 Contributions are welcome! Please follow these steps:
